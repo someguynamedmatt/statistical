@@ -14,4 +14,4 @@ keywords = ["statistics", "statistical", "analysis", "math", "algorithm"]
 
 [dependencies]
 rand = "0.3.7"
-num = "0.1.23"
+num = "0.1.42"
