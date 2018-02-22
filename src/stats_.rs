@@ -139,33 +139,32 @@ pub fn standard_scores<T>(v: &[T]) -> Vec<T>
     return scores;
 }
 
-pub fn circular_mean<T>(v: &[T], vc: &[T]) -> T where T: Float {
-    let mut sin_mean: T = T::zero();
-    let mut cos_mean: T = T::zero();
+pub fn circular_mean<T>(v: &[T]) -> T where T: Float {
+    let mut sin_total: T = T::zero();
+    let mut cos_total: T = T::zero();
+    let len = num::cast::<usize, T>(v.len()).unwrap();
 
     for i in 0..v.len() {
-        sin_mean = sin_mean + v[i].to_radians().sin();
+        sin_total = sin_total + v[i].to_radians().sin();
+        cos_total = cos_total + v[i].to_radians().cos();
     }
 
-    for i in 0..vc.len() {
-        cos_mean = cos_mean + vc[i].to_radians().cos();
-    }
+    let sin_mean = sin_total / len;
+    let cos_mean = cos_total / len;
 
-    let sin_third = sin_mean / num::cast(3.0).unwrap();
-    let cos_third = cos_mean / num::cast(3.0).unwrap();
-    let arc_tan = T::atan(sin_third/ cos_third).to_degrees();
-    if sin_mean > T::zero() && cos_mean > T::zero() {
-        return arc_tan;
-    }
-    else if cos_mean < T::zero() {
-        return arc_tan + num::cast(180).unwrap();
-    }
-    else if sin_mean < T::zero() && cos_mean > T::zero() {
-        return arc_tan + num::cast(360).unwrap();
-    } else {
-        return num::cast(666.0).unwrap();
-        // return num::cast::<T, T>(T::zero()).unwrap()
-    }
+    let circular_mean =
+        if sin_mean > T::zero() && cos_mean > T::zero() {
+            T::atan(sin_mean / cos_mean).to_degrees()
+        }
+        else if cos_mean < T::zero() {
+            T::atan(sin_mean / cos_mean).to_degrees() + num::cast(180).unwrap()
+        }
+        else if sin_mean < T::zero() && cos_mean > T::zero() {
+            T::atan(sin_mean / cos_mean).to_degrees() + num::cast(360).unwrap()
+        } else {
+            T::zero() // TODO: This probably shouldn't be zero
+        };
+    return circular_mean;
 }
 
 #[inline(always)]
@@ -349,9 +348,8 @@ mod tests {
     fn test_circular_mean() {
         // let v = vec![consts::PI/4.0, -consts::PI/4.0];
         let v = vec![5.0, 15.0, 355.0];
-        let vc = vec![5.0, 15.0, 355.0];
         let expected = 0.0;
-        let m = circular_mean(&v, &vc);
+        let m = circular_mean(&v);
         assert_eq!(m, expected);
     }
 }
