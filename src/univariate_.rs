@@ -22,9 +22,7 @@ use std::collections::HashMap;
 use std::hash::Hash;
 
 use num::{Float,
-          One,
-          PrimInt,
-          Zero};
+          PrimInt};
 
 use super::stats_ as stats;
 

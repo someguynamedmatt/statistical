@@ -18,12 +18,14 @@
 extern crate rand;
 extern crate num;
 
+use std::f64::consts;
+
+#[allow(unused_imports)]
 use num::{Float,
           Num,
           NumCast,
           One,
           Zero};
-
 
 pub enum Degree {
     One,
@@ -137,6 +139,35 @@ pub fn standard_scores<T>(v: &[T]) -> Vec<T>
     return scores;
 }
 
+pub fn circular_mean<T>(v: &[T], vc: &[T]) -> T where T: Float {
+    let mut sin_mean: T = T::zero();
+    let mut cos_mean: T = T::zero();
+
+    for i in 0..v.len() {
+        sin_mean = sin_mean + v[i].to_radians().sin();
+    }
+
+    for i in 0..vc.len() {
+        cos_mean = cos_mean + vc[i].to_radians().cos();
+    }
+
+    let sin_third = sin_mean / num::cast(3.0).unwrap();
+    let cos_third = cos_mean / num::cast(3.0).unwrap();
+    let arc_tan = T::atan(sin_third/ cos_third).to_degrees();
+    if sin_mean > T::zero() && cos_mean > T::zero() {
+        return arc_tan;
+    }
+    else if cos_mean < T::zero() {
+        return arc_tan + num::cast(180).unwrap();
+    }
+    else if sin_mean < T::zero() && cos_mean > T::zero() {
+        return arc_tan + num::cast(360).unwrap();
+    } else {
+        return num::cast(666.0).unwrap();
+        // return num::cast::<T, T>(T::zero()).unwrap()
+    }
+}
+
 #[inline(always)]
 fn select_pivot<T>(v: &mut [T])
     where T: Copy
@@ -189,7 +220,8 @@ mod tests {
     use super::*;
     use num::Float;
     use num::abs;
-
+    use std::f64::consts;
+    /*
     const EPSILON: f32 = 1e-6;
 
     #[test]
@@ -312,5 +344,14 @@ mod tests {
             assert!(vec[i] < vec[i+1], "sorted vectors must be monotonically increasing");
         }
     }
-
+    */
+    #[test]
+    fn test_circular_mean() {
+        // let v = vec![consts::PI/4.0, -consts::PI/4.0];
+        let v = vec![5.0, 15.0, 355.0];
+        let vc = vec![5.0, 15.0, 355.0];
+        let expected = 0.0;
+        let m = circular_mean(&v, &vc);
+        assert_eq!(m, expected);
+    }
 }
