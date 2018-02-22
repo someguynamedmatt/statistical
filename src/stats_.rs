@@ -151,7 +151,7 @@ pub fn circular_mean<T>(v: &[T]) -> T where T: Float {
 
     let sin_mean = sin_total / len;
     let cos_mean = cos_total / len;
-    assert!(cos_mean > T::zero(), "zero-valued cosine mean");
+    assert!(cos_mean != T::zero(), "zero-valued cosine mean");
 
     let circular_mean =
         if sin_mean > T::zero() && cos_mean > T::zero() {
